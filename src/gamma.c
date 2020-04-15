@@ -1,9 +1,9 @@
 /** @file
- * Silnik gry gamma
+ * Implementacja modułu silnika gry gamma
  *
  * @author Adrian Matwiejuk <am418419@students.mimuw.edu.pl>
  * @copyright Uniwersytet Warszawski
- * @date 13.04.2020
+ * @date 15.04.2020
  */
 
 #include <assert.h>
