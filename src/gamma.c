@@ -1,9 +1,9 @@
 /** @file
- * Implementacja modułu silnika gry gamma
+ * Silnik gry gamma
  *
  * @author Adrian Matwiejuk <am418419@students.mimuw.edu.pl>
  * @copyright Uniwersytet Warszawski
- * @date 14.04.2020
+ * @date 13.04.2020
  */
 
 #include <assert.h>
@@ -61,13 +61,19 @@ gamma_t *gamma_new(uint32_t width, uint32_t height,
     }
 
     gamma_t *g = malloc(sizeof(*g));
+    if (g == NULL) {
+        return NULL;
+    }
     g->width = width;
     g->height = height;
     g->max_areas = areas;
 
     g->player_count = players;
     g->players = malloc(players * sizeof(player));
-    assert(g->players != NULL);
+    if (g->players == NULL) {
+        free(g);
+        return NULL;
+    }
     for (uint32_t i = 0; i < players; i++) {
         g->players[i].busy_fields = 0;
         g->players[i].free_fields = 0;
@@ -76,10 +82,22 @@ gamma_t *gamma_new(uint32_t width, uint32_t height,
     }
 
     g->board = malloc(width * sizeof(field));
-    assert(g->board != NULL);
+    if (g->board == NULL) {
+        free(g->players);
+        free(g);
+        return NULL;
+    }
     for (uint32_t i = 0; i < width; i++) {
         g->board[i] = malloc(height * sizeof(field));
-        assert(g->board[i] != NULL);
+        if (g->board[i] == NULL) {
+            free(g->players);
+            for (uint32_t j = 0; j < i; j++) {
+                free(g->board[j]);
+            }
+            free(g->board);
+            free(g);
+            return NULL;
+        }
     }
 
     for (uint32_t i = 0; i < width; i++) {
@@ -521,7 +539,9 @@ char *gamma_board(gamma_t *g) {
     char *board = NULL;
     if (g->player_count < 10) {
         board = malloc(1 + (g->width + 1) * g->height * sizeof(char));
-        assert(board != NULL);
+        if (board == NULL) {
+            return NULL;
+        }
         for (uint32_t y = 0; y < g->height; y++) {
 
             for (uint32_t x = 0; x < g->width; x++) {
@@ -545,11 +565,13 @@ char *gamma_board(gamma_t *g) {
             }
         }
         board = malloc(1 + bonus_space + (g->width + 1) * g->height * sizeof(char));
+        if (board == NULL) {
+            return NULL;
+        }
         for (uint64_t i = 0; i < bonus_space + (g->width + 1) * g->height; i++) {
             board[i] = '\n';
         }
         uint64_t current_bonus = bonus_space;
-        assert(board != NULL);
         for (uint32_t y = 0; y < g->height; y++) {
             bool stop = false;
             for (uint32_t x = g->width - 1; !stop; x--) {
