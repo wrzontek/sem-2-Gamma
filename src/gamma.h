@@ -9,13 +9,43 @@
 #ifndef GAMMA_H
 #define GAMMA_H
 
+#include <assert.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-/**
- * Struktura przechowująca stan gry.
+#define NONE 0 ///< oznakowanie pola nie należącego do żadnego gracza
+
+/** @brief Struktura jednego pola planszy.
+ * Trzyma niezbędne informacje o danym polu.
  */
-typedef struct gamma gamma_t;
+struct field {
+    struct field *root; ///< wskaźnik na reprezentanta obszaru do którego należy dane pole
+    uint32_t owner;     ///< właściciel pola, liczba dodatnia
+};
+typedef struct field field; ///< field jest w naszym programie typem
+
+/** @brief Struktura jednego gracza.
+ * Trzyma niezbędne informacje o danym graczu.
+ */
+typedef struct {
+    uint64_t busy_fields; ///< ilość pól zajętych przez gracza, liczba nieujemna
+    uint64_t free_fields; ///< ilość wolnych pól sąsiadujących z polami gracza, liczba nieujemna
+    uint32_t areas;       ///< ile obszarów tworzą zajęte przez gracza pola, liczba nieujemna
+    bool golden_unused;   ///< true jeżeli gracz nie użył jeszcze złotego ruchu, false wpp
+} player;
+
+/** @brief Struktura przechowująca stan gry.
+ * Trzyma niezbędne informacje o stanie gry.
+ */
+typedef struct {
+    uint32_t width;        ///< szerokość planszy, liczba dodatnia
+    uint32_t height;       ///< wysokość planszy, liczba dodatnia
+    uint32_t player_count; ///< liczba graczy, liczba dodatnia
+    player *players;       ///< tablica graczy
+    uint32_t max_areas;    ///< maksymalna liczba obszarów, jakie może zająć jeden gracz, liczba dodatnia
+    field **board;         ///< dwuwymiarowa tablica pól
+} gamma_t;
 
 /** @brief Tworzy strukturę przechowującą stan gry.
  * Alokuje pamięć na nową strukturę przechowującą stan gry.
@@ -28,7 +58,7 @@ typedef struct gamma gamma_t;
  * @return Wskaźnik na utworzoną strukturę lub NULL, gdy nie udało się
  * zaalokować pamięci lub któryś z parametrów jest niepoprawny.
  */
-gamma_t* gamma_new(uint32_t width, uint32_t height,
+gamma_t *gamma_new(uint32_t width, uint32_t height,
                    uint32_t players, uint32_t areas);
 
 /** @brief Usuwa strukturę przechowującą stan gry.
@@ -109,6 +139,6 @@ bool gamma_golden_possible(gamma_t *g, uint32_t player);
  * @return Wskaźnik na zaalokowany bufor zawierający napis opisujący stan
  * planszy lub NULL, jeśli nie udało się zaalokować pamięci.
  */
-char* gamma_board(gamma_t *g);
+char *gamma_board(gamma_t *g);
 
 #endif /* GAMMA_H */

@@ -6,44 +6,7 @@
  * @date 15.04.2020
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
-#define NONE 0 ///< oznakowanie pola nie należącego do żadnego gracza
-
-/** @brief Struktura jednego pola planszy.
- * Trzyma niezbędne informacje o danym polu.
- */
-struct field {
-    struct field *root; ///< wskaźnik na reprezentanta obszaru do którego należy dane pole
-    uint32_t owner;     ///< właściciel pola, liczba dodatnia
-};
-typedef struct field field; ///< field jest w naszym programie typem
-
-/** @brief Struktura jednego gracza.
- * Trzyma niezbędne informacje o danym graczu.
- */
-typedef struct {
-    uint64_t busy_fields; ///< ilość pól zajętych przez gracza, liczba nieujemna
-    uint64_t free_fields; ///< ilość wolnych pól sąsiadujących z polami gracza, liczba nieujemna
-    uint32_t areas;       ///< ile obszarów tworzą zajęte przez gracza pola, liczba nieujemna
-    bool golden_unused;   ///< true jeżeli gracz nie użył jeszcze złotego ruchu, false wpp
-} player;
-
-/** @brief Struktura przechowująca stan gry.
- * Trzyma niezbędne informacje o stanie gry.
- */
-typedef struct {
-    uint32_t width;        ///< szerokość planszy, liczba dodatnia
-    uint32_t height;       ///< wysokość planszy, liczba dodatnia
-    uint32_t player_count; ///< liczba graczy, liczba dodatnia
-    player *players;       ///< tablica graczy
-    uint32_t max_areas;    ///< maksymalna liczba obszarów, jakie może zająć jeden gracz, liczba dodatnia
-    field **board;         ///< dwuwymiarowa tablica pól
-} gamma_t;
+#include "gamma.h"
 
 /**
  * Funckja pomocnicza zamieniająca wskaźniki na pola
@@ -503,10 +466,16 @@ bool gamma_golden_move(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
 
 
 uint64_t gamma_busy_fields(gamma_t *g, uint32_t player) {
+    if (player > g->player_count) {
+        return 0;
+    }
     return g->players[player - 1].busy_fields;
 }
 
 uint64_t gamma_free_fields(gamma_t *g, uint32_t player) {
+    if (player > g->player_count) {
+        return 0;
+    }
     if (g->players[player - 1].areas < g->max_areas) {
         uint64_t free_fields = g->width * g->height;
         for (uint32_t i = 0; i < g->player_count; i++) {
@@ -519,7 +488,7 @@ uint64_t gamma_free_fields(gamma_t *g, uint32_t player) {
 }
 
 bool gamma_golden_possible(gamma_t *g, uint32_t player) {
-    if (g->players[player - 1].golden_unused == false) {
+    if (player > g->player_count || g->players[player - 1].golden_unused == false) {
         return false;
     }
 
