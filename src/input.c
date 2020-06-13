@@ -108,7 +108,7 @@ int *get_command(gamma_t *g, bool *correct_command, bool *end_of_input) {
                     break;
                 } else {
                     unsigned long long arg = get_argument(&c, correct_command, end_of_input);
-                    if (arg <= UINT32_MAX) { // wartość nie mieści się w dopuszczalnym zakresie
+                    if (arg <= UINT32_MAX) { // wartość mieści się w dopuszczalnym zakresie
                         command[i] = (int) arg;
                         i++;
                         if (c != EOF && c != '\n')

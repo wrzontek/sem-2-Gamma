@@ -19,18 +19,33 @@ set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra")
 # set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 # set(CMAKE_C_FLAGS_DEBUG "-g")
 
-# Wskazujemy pliki źródłowe.
-set(SOURCE_FILES
+# Wskazujemy pliki źródłowe dla testów silnika.
+set(TEST_SOURCE_FILES
     src/gamma.c
     src/gamma.h
-    #src/gamma_test.c
+    src/gamma_test.c
     src/gamma_batch_mode.c 
     src/gamma_batch_mode.h 
     src/gamma_interactive_mode.c 
     src/gamma_interactive_mode.h
-    src/gamma_main.c 
     src/input.c 
     src/input.h)
+
+#Wskazujemy pliki źródłowe.
+set(SOURCE_FILES
+        src/gamma.c
+        src/gamma.h
+        src/gamma_batch_mode.c
+        src/gamma_batch_mode.h
+        src/gamma_interactive_mode.c
+        src/gamma_interactive_mode.h
+        src/input.c
+        src/input.h
+        src/gamma_main.c)
+
+# Wskazujemy plik wykonywalny dla testów silnika.
+add_executable(test EXCLUDE_FROM_ALL ${TEST_SOURCE_FILES})
+set_target_properties(test PROPERTIES OUTPUT_NAME gamma_test)
 
 # Wskazujemy plik wykonywalny.
 add_executable(gamma ${SOURCE_FILES})

@@ -97,8 +97,8 @@ static uint32_t owner_fields_neighbouring(gamma_t *g, uint32_t player, uint32_t 
     uint32_t owner_fields_neighbouring = 0;
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player)
                 owner_fields_neighbouring++;
         }
@@ -132,8 +132,8 @@ static field *find_root(field *a) {
 static void unite_single(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player)
                 g->board[x][y].root = find_root(&g->board[x + change[i]][y + change[3 - i]]);
         }
@@ -160,8 +160,8 @@ static void unite_single(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
 static void unite_multiple(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player) {
                 g->board[x][y].root = find_root(&g->board[x + change[i]][y + change[3 - i]]);
                 break;
@@ -170,8 +170,8 @@ static void unite_multiple(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) 
     }
 
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player) {
                 field *root = find_root(&g->board[x + change[i]][y + change[3 - i]]);
                 if (root != g->board[x][y].root) {
@@ -199,8 +199,8 @@ static uint64_t new_free_fields(gamma_t *g, uint32_t player, uint32_t x, uint32_
     uint64_t new_free_fields = 0;
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == NONE)
                 if (owner_fields_neighbouring(g, player, x + change[i], y + change[3 - i]) == 0)
                     new_free_fields++;
@@ -228,8 +228,8 @@ static void make_field_busy(gamma_t *g, uint32_t player, uint32_t x, uint32_t y)
     uint32_t owner[4] = {NONE, NONE, NONE, NONE};
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
 
             if (g->board[x + change[i]][y + change[3 - i]].owner != player &&
                 g->board[x + change[i]][y + change[3 - i]].owner != NONE) {
@@ -298,8 +298,8 @@ static uint32_t separated_areas(gamma_t *g, uint32_t player, uint32_t x, uint32_
     field *root[4] = {NULL, NULL, NULL, NULL};
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player) {
                 root[i] = g->board[x + change[i]][y + change[3 - i]].root;
             }
@@ -339,8 +339,8 @@ static void set_accessible_root(gamma_t *g, uint32_t player, uint32_t x, uint32_
     field *new_root = g->board[x][y].root;
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player &&
                 g->board[x + change[i]][y + change[3 - i]].root != new_root) {
 
@@ -368,8 +368,8 @@ static void set_accessible_root(gamma_t *g, uint32_t player, uint32_t x, uint32_
 static void update_roots(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
     int change[4] = {-1, 0, 1, 0};
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+            (int64_t) y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player) {
                 g->board[x + change[i]][y + change[3 - i]].root = NULL;
             }
@@ -377,8 +377,8 @@ static void update_roots(gamma_t *g, uint32_t player, uint32_t x, uint32_t y) {
     }
 
     for (uint32_t i = 0; i < 4; i++) {
-        if ((int) x + change[i] >= 0 && x + change[i] < g->width &&
-            (int) y + change[3 - i] >= 0 && y + change[3 - i] < g->height) {
+        if ((int64_t)x + change[i] >= 0 && (int64_t)x + change[i] < g->width &&
+        (int64_t)y + change[3 - i] >= 0 && (int64_t)y + change[3 - i] < g->height) {
             if (g->board[x + change[i]][y + change[3 - i]].owner == player &&
                 g->board[x + change[i]][y + change[3 - i]].root == NULL) {
                 g->board[x + change[i]][y + change[3 - i]].root = &g->board[x + change[i]][y + change[3 - i]];
@@ -477,7 +477,7 @@ uint64_t gamma_free_fields(gamma_t *g, uint32_t player) {
         return 0;
     }
     if (g->players[player - 1].areas < g->max_areas) {
-        uint64_t free_fields = g->width * g->height;
+        uint64_t free_fields = (uint64_t)g->width * g->height;
         for (uint32_t i = 0; i < g->player_count; i++) {
             free_fields -= g->players[i].busy_fields;
         }
@@ -487,18 +487,56 @@ uint64_t gamma_free_fields(gamma_t *g, uint32_t player) {
     }
 }
 
-bool gamma_golden_possible(gamma_t *g, uint32_t player) {
-    if (player > g->player_count || g->players[player - 1].golden_unused == false) {
-        return false;
-    }
+bool golden_target_avalible(gamma_t *g, uint32_t player) {
 
-    for (uint32_t i = 0; i < g->player_count; i++) {
-        if (i != player - 1 && g->players[i].busy_fields > 0) {
-            return true;
+    for (uint32_t x = 0; x < g->width; x++) {
+        for (uint32_t y = 0; y < g->height; y++) {
+
+            field current_field = g->board[x][y];
+            if (current_field.owner != player && current_field.owner != NONE) {
+                if (owner_fields_neighbouring(g, player, x, y) > 0) {
+
+                    uint32_t victim_areas_under_limit = g->max_areas - g->players[current_field.owner - 1].areas;
+                    if (victim_areas_under_limit >= 2) {// w tej sytuacji ofiarze przybędą maksymalnie dwa nowe obszary
+                        return true;
+                    }
+                    uint32_t victim = current_field.owner;
+                    current_field.owner = player;
+                    update_roots(g, victim, x, y);
+                    uint32_t new_areas = separated_areas(g, victim, x ,y);
+                    current_field.owner = victim;
+
+                    if (new_areas <= victim_areas_under_limit)
+                        return true;
+
+                }
+            }
+
         }
     }
 
     return false;
+}
+
+bool gamma_golden_possible(gamma_t *g, uint32_t player) {
+    if (player > g->player_count || g->players[player - 1].golden_unused == false) {
+        return false;
+    }
+    bool other_players_have_fields = false;
+    for (uint32_t i = 0; i < g->player_count; i++) {
+        if (i != player - 1 && g->players[i].busy_fields > 0) {
+            other_players_have_fields = true;
+            break;
+        }
+    }
+    if (!other_players_have_fields) {
+        return false;
+    }
+    if (g->players[player - 1].areas < g->max_areas) {
+        return true;
+    }
+
+    return golden_target_avalible(g, player);
 }
 
 char *gamma_board(gamma_t *g) {
@@ -507,7 +545,7 @@ char *gamma_board(gamma_t *g) {
     }
     char *board = NULL;
     if (g->player_count < 10) {
-        board = malloc(1 + (g->width + 1) * g->height * sizeof(char));
+        board = malloc(1 + (uint64_t)(g->width + 1) * g->height * sizeof(char));
         if (board == NULL) {
             return NULL;
         }
@@ -533,7 +571,7 @@ char *gamma_board(gamma_t *g) {
                 }
             }
         }
-        board = malloc(1 + bonus_space + (g->width + 1) * g->height * sizeof(char));
+        board = malloc(1 + bonus_space + (uint64_t)(g->width + 1) * g->height * sizeof(char));
         if (board == NULL) {
             return NULL;
         }

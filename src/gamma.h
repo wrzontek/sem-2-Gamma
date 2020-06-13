@@ -121,12 +121,13 @@ uint64_t gamma_free_fields(gamma_t *g, uint32_t player);
 
 /** @brief Sprawdza, czy gracz może wykonać złoty ruch.
  * Sprawdza, czy gracz @p player jeszcze nie wykonał w tej rozgrywce złotego
- * ruchu i jest przynajmniej jedno pole zajęte przez innego gracza.
+ * ruchu i jest przynajmniej jedno pole zajęte przez innego gracza, którego zajęcie
+ * nie spowoduje przekroczenia przez gracza wykonującego ruch ani przez 'ofiarę'
+ * limitu obszarów.
  * @param[in] g       – wskaźnik na strukturę przechowującą stan gry,
  * @param[in] player  – numer gracza, liczba dodatnia niewiększa od wartości
  *                      @p players z funkcji @ref gamma_new.
- * @return Wartość @p true, jeśli gracz jeszcze nie wykonał w tej rozgrywce
- * złotego ruchu i jest przynajmniej jedno pole zajęte przez innego gracza,
+ * @return Wartość @p true, jeśli gracz może wykonać przy aktualnym stanie planszy złoty ruch.
  * a @p false w przeciwnym przypadku.
  */
 bool gamma_golden_possible(gamma_t *g, uint32_t player);

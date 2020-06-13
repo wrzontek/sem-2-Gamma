@@ -8,23 +8,27 @@
 
 #include "gamma_interactive_mode.h"
 
-/** @brief Funkcja zapożyczona ze stackoverflow, wczytuje pojedynczy znak z wejścia bez buforowania.
-    Czarna magia jest to dla mnie, funkcję znalazłem tu:
-    https://stackoverflow.com/questions/558009/ansi-c-no-echo-keyboard-input?fbclid=IwAR2otMnZJHtIIrgbRAwkhZfJkAFoTAYb7QgWVJameduGxyRIF37FQTt-eHQ
+/** @brief Funkcja wyłączająca wypisywanie wczytywanych znaków do terminala.
+ * Funkcja podesłana w komentarzu do części drugiej (dziękuję bardzo za pomocne wyjaśnienia :) )
  */
-static int getche(void) {
-    struct termios oldattr, newattr;
-    int ch;
+static struct termios disable_terminal_echo()
+{
+    struct termios newattr, oldattr;
     tcgetattr(STDIN_FILENO, &oldattr);
     newattr = oldattr;
     newattr.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
-    system("stty -echo");
-    ch = getchar();
-    system("stty echo");
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
-    return ch;
+
+    return oldattr;
 }
+
+/** @brief Funkcja włączająca wypisywanie wczytywanych znaków do terminala.
+ */
+static void enable_terminal_echo(struct termios oldattr)
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
+}
+
 
 /** @brief Wypisuje informacje o graczu.
  * @param[in] *g        – wskaźnik na strukturę przechowującą stan gry,
@@ -35,7 +39,7 @@ static void print_player_info(gamma_t *g, uint32_t player) {
     uint64_t free_fields = gamma_free_fields(g, player);
 
     printf("PLAYER %d BUSY: %ld FREE: %ld", player, busy_fields, free_fields);
-    if (g->players[player - 1].golden_unused) {
+    if (gamma_golden_possible(g,player)) {
         printf(" G");
     }
     printf("\n");
@@ -47,13 +51,13 @@ static void print_player_info(gamma_t *g, uint32_t player) {
  * @param[in] player    – numer gracza, liczba dodatnia,
  * @param[in, out] x, y - aktualna pozycja kursora, liczby nieujemne
  */
-static void interactive_move(gamma_t *g, uint32_t player, uint32_t *x, uint32_t *y) {
+static void interactive_move(gamma_t *g, uint32_t player, uint32_t *x, uint32_t *y, bool *game_shut_down) {
     bool move_made = false;
     while (!move_made) {
-        int ch = getche();
+        int ch = getchar();
         if (ch == '\033') { // strzałka daje nam trzy znaki : '\033', '[' i jeden z 'A', 'B', 'C', 'D'
-            getche(); // omijamy '['
-            ch = getche();
+            getchar(); // omijamy '['
+            ch = getchar();
 
             if (!((ch == 'A' && g->height - *y == g->height - 1) || (ch == 'B' && g->height - *y == 0)
                   || (ch == 'C' && *x == g->width) || (ch == 'D' && *x - 1 == 0))) {
@@ -81,20 +85,30 @@ static void interactive_move(gamma_t *g, uint32_t player, uint32_t *x, uint32_t 
             }
         } else if (ch == 'C' || ch == 'c') { // rezygancja z ruchu
             move_made = true;
+        } else if (ch == EOF) { // wyłączenie gry
+            move_made = true;
+            *game_shut_down = true;
         }
 
     }
 }
 
+void move_cursor_to_center(uint32_t x, uint32_t y) {
+    printf("\033[%d;%dH", y, x);
+}
+
 void interactive_play(gamma_t *g) {
-    uint32_t x = (g->width + 1) / 2;
-    uint32_t y = (g->height + 1) / 2;
+    struct termios terminal_settings = disable_terminal_echo();
+
+    uint32_t x = (uint64_t)(g->width + 1) / 2;
+    uint32_t y = (uint64_t)(g->height + 1) / 2;
 
     printf(CLEAR_CONSOLE);
     bool end = false;
+    bool game_shut_down = false;
     char *board_string = NULL;
 
-    while (!end) {
+    while (!end && !game_shut_down) {
         end = true;
         for (uint32_t player = 0; player < g->player_count; player++) {
             if (g->players[player].free_fields > 0 || g->players[player].golden_unused) {
@@ -109,19 +123,25 @@ void interactive_play(gamma_t *g) {
                 }
                 print_player_info(g, player + 1);
 
-                printf("\033[%d;%dH", y, x);
+                move_cursor_to_center(x,y);
 
                 end = false; // jeśli któryś z graczy może wykonać ruch to nie kończymy
 
-                interactive_move(g, player + 1, &x, &y);
-
+                interactive_move(g, player + 1, &x, &y, &game_shut_down);
+                if (game_shut_down) {
+                    break;
+                }
             }
         }
     }
 
     printf(CLEAR_CONSOLE);
-    printf(gamma_board(g));
+    board_string = gamma_board(g);
+    printf(board_string);
+    free(board_string);
     for (uint32_t player = 0; player < g->player_count; player++) {
         print_player_info(g, player + 1);
     }
+
+    enable_terminal_echo(terminal_settings);
 }
